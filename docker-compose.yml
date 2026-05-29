@@ -1,0 +1,39 @@
+services:
+  plutoiptv:
+    build: ./pluto-iptv
+    container_name: plutoiptv
+    restart: unless-stopped
+    volumes:
+      - M:/Media/tv/iptv:/data
+    command: >
+      sh -c '
+        while true; do
+          node /app/index.js
+          sleep 21600
+        done
+      '
+    networks:
+      - appnet
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    ports:
+      - "7000:8096"
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+
+      # Media libraries
+      - "M:/Media/tv:/media/tv:ro"
+      - "M:/Media/movies:/media/movies:ro"
+      - "M:/Media/home-videos:/media/home-videos:ro"
+      - "M:/Media/photos:/media/photos:ro"
+      - "M:/Media/audio:/media/audio:ro"
+    restart: unless-stopped
+    networks:
+      - appnet
+
+
+networks:
+  appnet:
+    driver: bridge
